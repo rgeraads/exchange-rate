@@ -34,4 +34,3 @@ final class CurrencyConverterApiExchangeRateRetrieverTest extends \PHPUnit_Frame
         $this->assertSame(0.9211, $exchangeRateRetriever->getFor($currency->reveal()));
     }
 }
-
