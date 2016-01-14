@@ -1,0 +1,25 @@
+{
+  "name": "rgeraads/exchangerate",
+  "license": "proprietary",
+  "type": "library",
+  "description": "retrieves exchange rates, potentially from various sources.",
+  "autoload": {
+    "psr-4": {
+      "ExchangeRate\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "ExchangeRate\\": "tests/"
+    }
+  },
+  "require": {
+    "php": ">=5.5.9",
+    "beberlei/assert": "^2.4",
+    "mathiasverraes/money": "^1.2",
+    "guzzlehttp/guzzle": "^6.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^4.8"
+  }
+}
