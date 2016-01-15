@@ -4,13 +4,13 @@
   "type": "library",
   "description": "retrieves exchange rates, potentially from various sources.",
   "autoload": {
-    "psr-0": {
-      "ExchangeRate": "src/"
+    "psr-4": {
+      "ExchangeRate\\": "src/ExchangeRate/"
     }
   },
   "autoload-dev": {
-    "psr-0": {
-      "ExchangeRate": "tests/"
+    "psr-4": {
+      "ExchangeRate\\": "tests/ExchangeRate/"
     }
   },
   "require": {

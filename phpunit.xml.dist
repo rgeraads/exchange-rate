@@ -9,7 +9,7 @@
          bootstrap="vendor/autoload.php"
 >
     <testsuites>
-        <testsuite name="exchangerate">
+        <testsuite name="exchange-rate">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
