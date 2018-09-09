@@ -2,13 +2,13 @@
 
 namespace ExchangeRate;
 
-use Assert\Assertion as Assert;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Money\Currency;
 
 final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRetriever
 {
-    private const EXCHANGE_RATE_API_URL = 'http://free.currencyconverterapi.com';
+    private const EXCHANGE_RATE_API_URL = 'https://free.currencyconverterapi.com';
 
     /**
      * @var float[]
@@ -36,6 +36,9 @@ final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRet
 
     /**
      * @inheritdoc
+     *
+     * @throws GuzzleException
+     * @throws CurrencyConverterApiException
      */
     public function getFor(Currency $currency): float
     {
@@ -53,26 +56,24 @@ final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRet
      * Retrieves exchange rates from https://free.currencyconverterapi.com
      *
      * @param Currency $currency
+     *
+     * @throws GuzzleException
+     * @throws CurrencyConverterApiException
      */
     private function retrieveExchangeRateFor(Currency $currency): void
     {
-        $conversion = sprintf('%s_%s', $currency->getCode(), $this->baseCurrency->getCode());
+        $conversion = sprintf('%s_%s', $this->baseCurrency->getCode(), $currency->getCode());
 
-        $response = $this->client->request('GET', self::EXCHANGE_RATE_API_URL . '/api/v3/convert', [
+        $response = $this->client->request('GET', self::EXCHANGE_RATE_API_URL . '/api/v6/convert', [
             'query' => ['q' => $conversion]
         ]);
 
-        Assert::same($response->getStatusCode(), 200);
+        $data = json_decode($response->getBody(), true);
 
-        $rawExchangeRates = $response->getBody();;
-        $exchangeRates = json_decode($rawExchangeRates, true);
+        if (! array_key_exists($conversion, $data['results'])) {
+            throw CurrencyConverterApiException::currencyNotFound($currency->getCode());
+        }
 
-        Assert::isArray($exchangeRates);
-        Assert::keyExists($exchangeRates, 'results');
-        Assert::keyExists($exchangeRates['results'], $conversion);
-        Assert::keyExists($exchangeRates['results'][$conversion], 'val');
-        Assert::numeric($exchangeRates['results'][$conversion]['val']);
-
-        $this->exchangeRates[$currency->getCode()] = (float) $exchangeRates['results'][$conversion]['val'];
+        $this->exchangeRates[$currency->getCode()] = (float) $data['results'][$conversion]['val'];
     }
 }

@@ -18,7 +18,7 @@ final class CurrencyConverterApiExchangeRateRetrieverTest extends TestCase
         /** @var ResponseInterface $response */
         $response = $this->prophesize(ResponseInterface::class);
         $response->getStatusCode()->willReturn(200);
-        $response->getBody()->willReturn('{"query":{"count":1},"results":{"USD_EUR":{"fr":"USD","id":"USD_EUR","to":"EUR","val":0.9211}}}');
+        $response->getBody()->willReturn('{"query":{"count":1},"results":{"EUR_USD":{"id":"EUR_USD","val":1.154888,"to":"USD","fr":"EUR"}}}');
 
         /** @var ClientInterface $client */
         $client = $this->prophesize(ClientInterface::class);
@@ -27,8 +27,8 @@ final class CurrencyConverterApiExchangeRateRetrieverTest extends TestCase
         $baseCurrency = new Currency('EUR');
         $currency     = new Currency('USD');
 
-        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency, 'foo');
-        $this->assertSame(0.9211, $exchangeRateRetriever->getFor($currency));
+        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency, null);
+        $this->assertSame(1.154888, $exchangeRateRetriever->getFor($currency));
     }
 
     /**
@@ -48,7 +48,30 @@ final class CurrencyConverterApiExchangeRateRetrieverTest extends TestCase
         $baseCurrency = new Currency('EUR');
         $currency     = new Currency('EUR');
 
-        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency, 'foo');
+        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency, null);
         $this->assertSame(1.0, $exchangeRateRetriever->getFor($currency));
+    }
+
+    /**
+     * @test
+     * @expectedException \ExchangeRate\CurrencyConverterApiException
+     * @expectedExceptionMessage Sorry, currency "FOO" not found in list of currencies.
+     */
+    public function it_should_throw_if_the_currency_can_not_be_found()
+    {
+        /** @var ResponseInterface $response */
+        $response = $this->prophesize(ResponseInterface::class);
+        $response->getStatusCode()->willReturn(200);
+        $response->getBody()->willReturn('{"query":{"count":0},"results":{}}');
+
+        /** @var ClientInterface $client */
+        $client = $this->prophesize(ClientInterface::class);
+        $client->request(Arg::cetera())->willReturn($response);
+
+        $baseCurrency = new Currency('EUR');
+        $currency     = new Currency('FOO');
+
+        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency, null);
+        $exchangeRateRetriever->getFor($currency);
     }
 }

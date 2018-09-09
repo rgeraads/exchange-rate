@@ -15,6 +15,7 @@ $baseCurrency = new Currency('EUR');
 $currency     = new Currency('PHP');
 
 $exchangeRateConverter = new FixerIoExchangeRateRetriever($client, $baseCurrency, getenv('FIXER_IO_API_KEY'));
-$result = $exchangeRateConverter->getFor($currency);
 
-var_dump($result);
+$exchangeRate = $exchangeRateConverter->getFor($currency);
+
+var_dump($exchangeRate);
