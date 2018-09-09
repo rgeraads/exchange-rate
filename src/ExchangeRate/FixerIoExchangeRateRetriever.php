@@ -8,7 +8,7 @@ use Money\Currency;
 
 final class FixerIoExchangeRateRetriever implements ExchangeRateRetriever
 {
-    const EXCHANGE_RATE_API_URL = 'https://api.fixer.io';
+    private const EXCHANGE_RATE_API_URL = 'https://api.fixer.io';
 
     /**
      * @var float[]
@@ -37,7 +37,7 @@ final class FixerIoExchangeRateRetriever implements ExchangeRateRetriever
     /**
      * @inheritdoc
      */
-    public function getFor(Currency $currency)
+    public function getFor(Currency $currency): float
     {
         if ($currency->equals($this->baseCurrency)) {
             // fixer.io doesn't support same currencies, but we don't want it to break because of just that.

@@ -8,7 +8,7 @@ use Money\Currency;
 
 final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRetriever
 {
-    const EXCHANGE_RATE_API_URL = 'http://free.currencyconverterapi.com';
+    private const EXCHANGE_RATE_API_URL = 'http://free.currencyconverterapi.com';
 
     /**
      * @var float[]
@@ -37,7 +37,7 @@ final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRet
     /**
      * @inheritdoc
      */
-    public function getFor(Currency $currency)
+    public function getFor(Currency $currency): float
     {
         $this->retrieveExchangeRateFor($currency);
 
@@ -49,7 +49,7 @@ final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRet
      *
      * @param Currency $currency
      */
-    private function retrieveExchangeRateFor(Currency $currency)
+    private function retrieveExchangeRateFor(Currency $currency): void
     {
         $conversion = sprintf('%s_%s', $currency->getName(), $this->baseCurrency->getName());
 

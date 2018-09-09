@@ -4,10 +4,11 @@ namespace ExchangeRate;
 
 use GuzzleHttp\ClientInterface;
 use Money\Currency;
+use PHPUnit\Framework\TestCase;
 use Prophecy\Argument as Arg;
 use Psr\Http\Message\ResponseInterface;
 
-final class CurrencyConverterApiExchangeRateRetrieverTest extends \PHPUnit_Framework_TestCase
+final class CurrencyConverterApiExchangeRateRetrieverTest extends TestCase
 {
     /**
      * @test

@@ -18,5 +18,5 @@ interface ExchangeRateRetriever
      *
      * @return float
      */
-    public function getFor(Currency $currency);
+    public function getFor(Currency $currency): float;
 }
