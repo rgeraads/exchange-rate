@@ -28,7 +28,7 @@ final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRet
     /**
      * @inheritdoc
      */
-    public function __construct(ClientInterface $client, Currency $baseCurrency)
+    public function __construct(ClientInterface $client, Currency $baseCurrency, string $apiKey = null)
     {
         $this->client       = $client;
         $this->baseCurrency = $baseCurrency;
@@ -39,13 +39,18 @@ final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRet
      */
     public function getFor(Currency $currency): float
     {
-        $this->retrieveExchangeRateFor($currency);
+        if ($currency->equals($this->baseCurrency)) {
+            // no need to make an api call for same currencies.
+            $this->exchangeRates[$currency->getCode()] = (float) 1;
+        } else {
+            $this->retrieveExchangeRateFor($currency);
+        }
 
         return $this->exchangeRates[$currency->getCode()];
     }
 
     /**
-     * Retrieves exchange rates from http://free.currencyconverterapi.com
+     * Retrieves exchange rates from https://free.currencyconverterapi.com
      *
      * @param Currency $currency
      */

@@ -10,8 +10,9 @@ interface ExchangeRateRetriever
     /**
      * @param ClientInterface $client
      * @param Currency        $baseCurrency
+     * @param string          $apiKey
      */
-    public function __construct(ClientInterface $client, Currency $baseCurrency);
+    public function __construct(ClientInterface $client, Currency $baseCurrency, string $apiKey = null);
 
     /**
      * @param Currency $currency

@@ -2,13 +2,13 @@
 
 namespace ExchangeRate;
 
-use Assert\Assertion as Assert;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Money\Currency;
 
 final class FixerIoExchangeRateRetriever implements ExchangeRateRetriever
 {
-    private const EXCHANGE_RATE_API_URL = 'https://api.fixer.io';
+    private const EXCHANGE_RATE_API_URL = 'data.fixer.io/api';
 
     /**
      * @var float[]
@@ -26,21 +26,30 @@ final class FixerIoExchangeRateRetriever implements ExchangeRateRetriever
     private $baseCurrency;
 
     /**
-     * @inheritdoc
+     * @var string
      */
-    public function __construct(ClientInterface $client, Currency $baseCurrency)
-    {
-        $this->client       = $client;
-        $this->baseCurrency = $baseCurrency;
-    }
+    private $apiKey;
 
     /**
      * @inheritdoc
      */
+    public function __construct(ClientInterface $client, Currency $baseCurrency, string $apiKey = null)
+    {
+        $this->client       = $client;
+        $this->baseCurrency = $baseCurrency;
+        $this->apiKey       = $apiKey;
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * @throws FixerIoException
+     * @throws GuzzleException
+     */
     public function getFor(Currency $currency): float
     {
         if ($currency->equals($this->baseCurrency)) {
-            // fixer.io doesn't support same currencies, but we don't want it to break because of just that.
+            // no need to make an api call for same currencies.
             $this->exchangeRates[$currency->getCode()] = (float) 1;
         } else {
             $this->retrieveExchangeRateFor($currency);
@@ -50,26 +59,32 @@ final class FixerIoExchangeRateRetriever implements ExchangeRateRetriever
     }
 
     /**
-     * Retrieves exchange rates from http://fixer.io
+     * Retrieves exchange rates from https://fixer.io
      *
      * @param Currency $currency
+     *
+     * @throws FixerIoException
+     * @throws GuzzleException
      */
-    private function retrieveExchangeRateFor(Currency $currency)
+    private function retrieveExchangeRateFor(Currency $currency): void
     {
         $response = $this->client->request('GET', self::EXCHANGE_RATE_API_URL . '/latest', [
-            'query' => ['base' => $this->baseCurrency->getCode()]
+            'query' => [
+                'access_key' => $this->apiKey,
+                'base'       => $this->baseCurrency->getCode(),
+            ],
         ]);
 
-        Assert::same($response->getStatusCode(), 200);
+        $data = json_decode($response->getBody(), true);
 
-        $rawExchangeRates = $response->getBody();;
-        $exchangeRates = json_decode($rawExchangeRates, true);
+        if ($data['success'] !== true) {
+            throw FixerIoException::couldNotRetrieveRates($data['error']);
+        }
 
-        Assert::isArray($exchangeRates);
-        Assert::keyExists($exchangeRates, 'rates');
-        Assert::keyExists($exchangeRates['rates'], $currency->getCode());
-        Assert::numeric($exchangeRates['rates'][$currency->getCode()]);
+        if (! array_key_exists($currency->getCode(), $data['rates'])) {
+            throw FixerIoException::currencyNotFound($currency->getCode());
+        }
 
-        $this->exchangeRates[$currency->getCode()] = $exchangeRates['rates'][$currency->getCode()];
+        $this->exchangeRates[$currency->getCode()] = $data['rates'][$currency->getCode()];
     }
 }

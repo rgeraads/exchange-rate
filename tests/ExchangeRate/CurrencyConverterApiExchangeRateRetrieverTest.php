@@ -27,7 +27,28 @@ final class CurrencyConverterApiExchangeRateRetrieverTest extends TestCase
         $baseCurrency = new Currency('EUR');
         $currency     = new Currency('USD');
 
-        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency);
+        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency, 'foo');
         $this->assertSame(0.9211, $exchangeRateRetriever->getFor($currency));
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_not_make_an_api_call_for_the_same_currencies()
+    {
+        /** @var ResponseInterface $response */
+        $response = $this->prophesize(ResponseInterface::class);
+        $response->getStatusCode()->shouldNotBeCalled();
+        $response->getBody()->shouldNotBeCalled();
+
+        /** @var ClientInterface $client */
+        $client = $this->prophesize(ClientInterface::class);
+        $client->request(Arg::cetera())->shouldNotBeCalled();
+
+        $baseCurrency = new Currency('EUR');
+        $currency     = new Currency('EUR');
+
+        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency, 'foo');
+        $this->assertSame(1.0, $exchangeRateRetriever->getFor($currency));
     }
 }
