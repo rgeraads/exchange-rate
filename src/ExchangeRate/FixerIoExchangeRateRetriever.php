@@ -41,12 +41,12 @@ final class FixerIoExchangeRateRetriever implements ExchangeRateRetriever
     {
         if ($currency->equals($this->baseCurrency)) {
             // fixer.io doesn't support same currencies, but we don't want it to break because of just that.
-            $this->exchangeRates[$currency->getName()] = (float) 1;
+            $this->exchangeRates[$currency->getCode()] = (float) 1;
         } else {
             $this->retrieveExchangeRateFor($currency);
         }
 
-        return $this->exchangeRates[$currency->getName()];
+        return $this->exchangeRates[$currency->getCode()];
     }
 
     /**
@@ -57,7 +57,7 @@ final class FixerIoExchangeRateRetriever implements ExchangeRateRetriever
     private function retrieveExchangeRateFor(Currency $currency)
     {
         $response = $this->client->request('GET', self::EXCHANGE_RATE_API_URL . '/latest', [
-            'query' => ['base' => $this->baseCurrency->getName()]
+            'query' => ['base' => $this->baseCurrency->getCode()]
         ]);
 
         Assert::same($response->getStatusCode(), 200);
@@ -67,9 +67,9 @@ final class FixerIoExchangeRateRetriever implements ExchangeRateRetriever
 
         Assert::isArray($exchangeRates);
         Assert::keyExists($exchangeRates, 'rates');
-        Assert::keyExists($exchangeRates['rates'], $currency->getName());
-        Assert::numeric($exchangeRates['rates'][$currency->getName()]);
+        Assert::keyExists($exchangeRates['rates'], $currency->getCode());
+        Assert::numeric($exchangeRates['rates'][$currency->getCode()]);
 
-        $this->exchangeRates[$currency->getName()] = $exchangeRates['rates'][$currency->getName()];
+        $this->exchangeRates[$currency->getCode()] = $exchangeRates['rates'][$currency->getCode()];
     }
 }

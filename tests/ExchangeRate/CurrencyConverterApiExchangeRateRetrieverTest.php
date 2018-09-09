@@ -15,6 +15,7 @@ final class CurrencyConverterApiExchangeRateRetrieverTest extends TestCase
      */
     public function it_should_retrieve_the_exchange_rate()
     {
+        /** @var ResponseInterface $response */
         $response = $this->prophesize(ResponseInterface::class);
         $response->getStatusCode()->willReturn(200);
         $response->getBody()->willReturn('{"query":{"count":1},"results":{"USD_EUR":{"fr":"USD","id":"USD_EUR","to":"EUR","val":0.9211}}}');
@@ -23,15 +24,10 @@ final class CurrencyConverterApiExchangeRateRetrieverTest extends TestCase
         $client = $this->prophesize(ClientInterface::class);
         $client->request(Arg::cetera())->willReturn($response);
 
-        /** @var Currency $baseCurrency */
-        $baseCurrency = $this->prophesize(Currency::class);
-        $baseCurrency->getName()->willReturn('EUR');
+        $baseCurrency = new Currency('EUR');
+        $currency     = new Currency('USD');
 
-        /** @var Currency $currency */
-        $currency = $this->prophesize(Currency::class);
-        $currency->getName()->willReturn('USD');
-
-        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency->reveal());
-        $this->assertSame(0.9211, $exchangeRateRetriever->getFor($currency->reveal()));
+        $exchangeRateRetriever = new CurrencyConverterApiExchangeRateRetriever($client->reveal(), $baseCurrency);
+        $this->assertSame(0.9211, $exchangeRateRetriever->getFor($currency));
     }
 }

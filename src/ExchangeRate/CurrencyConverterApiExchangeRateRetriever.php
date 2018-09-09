@@ -41,7 +41,7 @@ final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRet
     {
         $this->retrieveExchangeRateFor($currency);
 
-        return $this->exchangeRates[$currency->getName()];
+        return $this->exchangeRates[$currency->getCode()];
     }
 
     /**
@@ -51,7 +51,7 @@ final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRet
      */
     private function retrieveExchangeRateFor(Currency $currency): void
     {
-        $conversion = sprintf('%s_%s', $currency->getName(), $this->baseCurrency->getName());
+        $conversion = sprintf('%s_%s', $currency->getCode(), $this->baseCurrency->getCode());
 
         $response = $this->client->request('GET', self::EXCHANGE_RATE_API_URL . '/api/v3/convert', [
             'query' => ['q' => $conversion]
@@ -68,6 +68,6 @@ final class CurrencyConverterApiExchangeRateRetriever implements ExchangeRateRet
         Assert::keyExists($exchangeRates['results'][$conversion], 'val');
         Assert::numeric($exchangeRates['results'][$conversion]['val']);
 
-        $this->exchangeRates[$currency->getName()] = (float) $exchangeRates['results'][$conversion]['val'];
+        $this->exchangeRates[$currency->getCode()] = (float) $exchangeRates['results'][$conversion]['val'];
     }
 }
