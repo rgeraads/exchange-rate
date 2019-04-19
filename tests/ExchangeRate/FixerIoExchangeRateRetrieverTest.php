@@ -54,11 +54,12 @@ final class FixerIoExchangeRateRetrieverTest extends TestCase
 
     /**
      * @test
-     * @expectedException \ExchangeRate\FixerIoException
-     * @expectedExceptionMessage Sorry, unable to retrieve exchange rates from Fixer.io.
      */
     public function it_should_throw_if_the_response_is_not_successful()
     {
+        $this->expectException(FixerIoException::class);
+        $this->expectExceptionMessage('Sorry, unable to retrieve exchange rates from Fixer.io.');
+
         /** @var ResponseInterface $response */
         $response = $this->prophesize(ResponseInterface::class);
         $response->getStatusCode()->willReturn(200);
@@ -77,11 +78,12 @@ final class FixerIoExchangeRateRetrieverTest extends TestCase
 
     /**
      * @test
-     * @expectedException \ExchangeRate\FixerIoException
-     * @expectedExceptionMessage Sorry, currency "FOO" not found in list of currencies.
      */
     public function it_should_throw_if_the_currency_can_not_be_found()
     {
+        $this->expectException(FixerIoException::class);
+        $this->expectExceptionMessage('Sorry, currency "FOO" not found in list of currencies.');
+
         /** @var ResponseInterface $response */
         $response = $this->prophesize(ResponseInterface::class);
         $response->getStatusCode()->willReturn(200);

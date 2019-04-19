@@ -54,11 +54,12 @@ final class CurrencyConverterApiExchangeRateRetrieverTest extends TestCase
 
     /**
      * @test
-     * @expectedException \ExchangeRate\CurrencyConverterApiException
-     * @expectedExceptionMessage Sorry, currency "FOO" not found in list of currencies.
      */
     public function it_should_throw_if_the_currency_can_not_be_found()
     {
+        $this->expectException(CurrencyConverterApiException::class);
+        $this->expectExceptionMessage('Sorry, currency "FOO" not found in list of currencies.');
+
         /** @var ResponseInterface $response */
         $response = $this->prophesize(ResponseInterface::class);
         $response->getStatusCode()->willReturn(200);
